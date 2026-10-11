@@ -1,6 +1,16 @@
 -- ──────────────────────────────────────────────
 --   Window Rules (Hyprland Lua — 0.55+)
 -- ──────────────────────────────────────────────
+-- Idle inhibit on fullscreen (YouTube/video): hypridle listeners
+-- (dim/lock/dpms/suspend) pause while inhibited. Browsers/mpv inhibit
+-- via Wayland/D-Bus only when Wayland-native, so force-inhibit any
+-- fullscreen surface (sway parity: inhibit_idle fullscreen).
+hl.window_rule({
+	name = "idle-inhibit-fullscreen",
+	match = { class = ".*" },
+	idle_inhibit = "fullscreen",
+})
+
 hl.window_rule({
 	name = "suppress-maximize",
 	match = { class = ".*" },

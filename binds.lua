@@ -9,24 +9,37 @@ local scripts = vars.scripts
 
 -- Default programs
 -- New terminal inherits the focused window's working directory; falls back
--- to vars.terminal (foot) in $HOME when no focused cwd can be resolved.
+-- to vars.terminal (alacritty) in $HOME when no focused cwd can be resolved.
 hl.bind(mod .. " + Return", hl.dsp.exec_cmd(scripts .. "/terminal-launch.sh"))
 hl.bind(mod .. " + Space", hl.dsp.exec_cmd(vars.menu))
 hl.bind(mod .. " + SHIFT + B", hl.dsp.exec_cmd(vars.browser))
 hl.bind(mod .. " + SHIFT + Return", hl.dsp.exec_cmd(vars.browser), { description = "Open browser" })
+hl.bind(mod .. " + E", hl.dsp.exec_cmd(vars.file), { description = "Open file manager" })
 hl.bind(mod .. " + SHIFT + ALT + B", hl.dsp.exec_cmd(vars.browser_private), { description = "Open private browser" })
 hl.bind(mod .. " + SHIFT + N", hl.dsp.exec_cmd(vars.editor), { description = "Open editor" })
 hl.bind(mod .. " + ALT + Return", hl.dsp.exec_cmd(vars.terminal_tmux), { description = "Open tmux" })
-hl.bind(mod .. " + ALT + K", hl.dsp.exec_cmd(vars.HOME .. "/.local/bin/menu-tmux-keybindings"), { description = "Tmux keybindings" })
 hl.bind(mod .. " + SHIFT + ALT + M", hl.dsp.exec_cmd("cliamp"), { description = "Music player (cliamp)" })
-hl.bind(mod .. " + SHIFT + D", hl.dsp.exec_cmd("lazydocker"), { description = "Docker (lazydocker)" })
-hl.bind(mod .. " + SHIFT + O", hl.dsp.exec_cmd("obsidian"), { description = "Open Obsidian" })
-hl.bind(mod .. " + CTRL + T", hl.dsp.exec_cmd("foot -e btop"), { description = "System monitor (btop)" })
+-- Disabled: lazydocker / obsidian not installed (sway parity: uncomment after xbps-install)
+-- hl.bind(mod .. " + SHIFT + D", hl.dsp.exec_cmd("lazydocker"), { description = "Docker (lazydocker)" })
+-- hl.bind(mod .. " + SHIFT + O", hl.dsp.exec_cmd("obsidian"), { description = "Open Obsidian" })
+hl.bind(mod .. " + CTRL + T", hl.dsp.exec_cmd("alacritty -e btop"), { description = "System monitor (btop)" })
 
 hl.bind(mod .. " + W", hl.dsp.window.close()) -- was killactive (graceful close)
+hl.bind(mod .. " + Q", hl.dsp.window.close(), { description = "Close window" })
 hl.bind("SUPER + CTRL + L", hl.dsp.exec_cmd("hyprlock"))
 hl.bind(mod .. " + F", hl.dsp.window.fullscreen({ mode = "fullscreen" })) -- was fullscreen, 0
-hl.bind(mod .. " + T", hl.dsp.window.float({ action = "toggle" }), { description = "Toggle window floating/tiling" }) -- togglefloating
+-- Float toggle (sway $mod+t parity): tiling -> small centered 900x600 float,
+-- floating -> back to tiling. In-process function bind: no hyprctl/jq script.
+hl.bind(mod .. " + T", function()
+	local w = hl.get_active_window()
+	if not w then return end
+	local was_floating = w.floating
+	hl.dispatch(hl.dsp.window.float())
+	if not was_floating then
+		hl.dispatch(hl.dsp.window.resize({ x = 900, y = 600 }))
+		hl.dispatch(hl.dsp.window.center())
+	end
+end, { description = "Toggle floating (small centered 900x600)" })
 hl.bind(mod .. " + P", hl.dsp.window.pseudo(), { description = "Pseudo window" }) -- pseudo
 hl.bind(mod .. " + S", hl.dsp.workspace.toggle_special("scratchpad"), { description = "Toggle scratchpad" })
 hl.bind(mod .. " + ALT + S", hl.dsp.window.move({ workspace = "special:scratchpad", follow = false }), { description = "Move window to scratchpad" })
@@ -77,7 +90,6 @@ hl.bind("CTRL + SHIFT + ALT + TAB", hl.dsp.focus({ monitor = "-1" }), { descript
 
 -- Layout / window helpers
 hl.bind(mod .. " + L", hl.dsp.exec_cmd(scripts .. "/workspace-layout-toggle.sh"), { description = "Toggle workspace layout" })
-hl.bind(mod .. " + O", hl.dsp.exec_cmd(scripts .. "/window-popout.sh"), { description = "Pop window out (float & pin)" })
 hl.bind(mod .. " + Home", hl.dsp.exec_cmd(scripts .. "/window-size-save.sh restore"), { description = "Restore saved window size" })
 hl.bind(mod .. " + ALT + Home", hl.dsp.exec_cmd(scripts .. "/window-size-save.sh save"), { description = "Save window size" })
 hl.bind(mod .. " + BACKSPACE", hl.dsp.exec_cmd(scripts .. "/window-transparency-toggle.sh"), { description = "Toggle window transparency" })
@@ -86,10 +98,12 @@ hl.bind(mod .. " + SLASH", hl.dsp.exec_cmd(scripts .. "/monitor-scaling.sh up"),
 hl.bind(mod .. " + ALT + SLASH", hl.dsp.exec_cmd(scripts .. "/monitor-scaling.sh down"), { description = "Monitor scaling down" })
 hl.bind("CTRL + ALT + DELETE", hl.dsp.exec_cmd(vars.HOME .. "/.local/bin/window-close-all"), { locked = true, description = "Close all windows" })
 
-hl.bind(mod .. " + CTRL + W", hl.dsp.exec_cmd("foot -e nmtui"), { description = "Network connections" })
+hl.bind(mod .. " + CTRL + W", hl.dsp.exec_cmd("alacritty -e nmtui"), { description = "Network connections" })
 hl.bind(mod .. " + ESCAPE", hl.dsp.exec_cmd("~/.config/waybar/scripts/power-menu.sh"))
 hl.bind(mod .. " + CTRL + P", hl.dsp.exec_cmd("~/.config/waybar/scripts/power-menu.sh"), { description = "Power / logout menu" })
-hl.bind(mod .. " + CTRL + B", hl.dsp.exec_cmd("foot -e bluetoothctl"), { description = "Bluetooth manager" })
+hl.bind(mod .. " + CTRL + B", hl.dsp.exec_cmd("~/.config/waybar/scripts/bluetooth-menu.sh"), { description = "Bluetooth menu" })
+hl.bind(mod .. " + ALT + C", hl.dsp.exec_cmd("~/.config/waybar/scripts/control-center.sh"), { description = "Control center" })
+hl.bind(mod .. " + CTRL + Q", hl.dsp.exec_cmd("rofi -show calc -modi calc -theme ~/.config/rofi/active-scripts.rasi"), { description = "Calculator" })
 hl.bind(mod .. " + CTRL + N", hl.dsp.exec_cmd(vars.HOME .. "/.local/bin/night-light-toggle"), { description = "Toggle nightlight" })
 hl.bind(mod .. " + CTRL + I", hl.dsp.exec_cmd(scripts .. "/idle-toggle.sh"), { description = "Toggle idle lock" })
 hl.bind(mod .. " + CTRL + E", hl.dsp.exec_cmd(vars.HOME .. "/.local/bin/menu-emoji"), { description = "Emojis" })
@@ -98,7 +112,7 @@ hl.bind(mod .. " + CTRL + E", hl.dsp.exec_cmd(vars.HOME .. "/.local/bin/menu-emo
 hl.bind(mod .. " + CTRL + Z", function() local z = hl.get_config("cursor.zoom_factor") or 1; hl.config({ cursor = { zoom_factor = z + 1 } }) end, { description = "Zoom in" })
 hl.bind(mod .. " + CTRL + ALT + Z", function() hl.config({ cursor = { zoom_factor = 1 } }) end, { description = "Reset zoom" })
 
-hl.bind(mod .. " + ALT + W", hl.dsp.exec_cmd("~/.config/hypr/scripts/waybar-selector.sh"), { description = "Waybar style selector" })
+hl.bind(mod .. " + ALT + W", hl.dsp.exec_cmd(vars.HOME .. "/.config/hypr/scripts/waybar-theme-toggle.sh"), { description = "Toggle waybar theme" })
 hl.bind(mod .. " + ALT + SHIFT + W", hl.dsp.exec_cmd(vars.HOME .. "/.local/bin/webapp-install-prompt"), { description = "Install web app (paste link)" })
 hl.bind(mod .. " + ALT + SHIFT + X", hl.dsp.exec_cmd(vars.HOME .. "/.local/bin/webapp-remove-prompt"), { description = "Remove web app" })
 
@@ -248,6 +262,10 @@ hl.bind("SUPER + CTRL + Print", hl.dsp.exec_cmd(vars.HOME .. "/.local/bin/ocr-ex
 -- Clipboard history (cliphist)
 hl.bind("SUPER + CTRL + V", hl.dsp.exec_cmd(vars.HOME .. "/.local/bin/menu-clipboard"), { description = "Clipboard history (Enter paste, Ctrl+Enter copy, Shift+Delete remove)" })
 hl.bind("SUPER + CTRL + SHIFT + V", hl.dsp.exec_cmd(vars.HOME .. "/.local/bin/menu-clipboard clipboard-wipe"), { description = "Wipe clipboard history" })
+
+-- Dictation (voxtype — binds run only if installed, else no-op, sway parity)
+hl.bind(mod .. " + CTRL + X", hl.dsp.exec_cmd("voxtype record toggle"), { description = "Toggle dictation" })
+hl.bind("F9", hl.dsp.exec_cmd("voxtype record start"), { description = "Start dictation" })
 
 -- ── Universal Clipboard (terminal-aware) ─────────────
 -- Send the chord with explicit mods straight to the focused surface, so the

@@ -1,38 +1,38 @@
 #!/usr/bin/env bash
 # ──────────────────────────────────────────────
 #   Ensure wallpaper is displayed on Hyprland start
-#   (single flat library: ~/.local/share/wallpapers)
+#   Deterministic clean start: any stale, frozen, or duplicate
+#   awww-daemon (query can report an image while pixels are stuck,
+#   and two daemons fight over the layer surface) is replaced with
+#   exactly one fresh daemon, then the current wallpaper is applied
+#   through the full hypr-wall.sh switch so image and theme agree.
 # ──────────────────────────────────────────────
+set -u
+WALL_DIRS=()
+for _d in "$HOME/.local/share/wallpapers" "$HOME/Pictures/Wallpapers"; do
+    [ -d "$_d" ] && WALL_DIRS+=("$_d")
+done
 
-WALL_DIR="$HOME/.local/share/wallpapers"
-
-# Wait for awww-daemon socket to be ready (up to 3s)
-for i in {1..30}; do
-    if awww query >/dev/null 2>&1; then
-        break
-    fi
+# Exactly one daemon: clear leftovers first (a second daemon started
+# while the login one is still coming up ends up painting over/under
+# it with a stale frame).
+pkill -x awww-daemon >/dev/null 2>&1 || true
+sleep 0.3
+setsid awww-daemon >/dev/null 2>&1 < /dev/null &
+for _ in $(seq 1 50); do
+    awww query >/dev/null 2>&1 && break
     sleep 0.1
 done
 
-# If an image is already displaying, we're done
-if awww query 2>/dev/null | grep -q "image:"; then
-    exit 0
+if [ -s "$HOME/.cache/current-wallpaper" ] && [ -f "$(<"$HOME/.cache/current-wallpaper")" ]; then
+    exec "$HOME/.config/hypr/scripts/hypr-wall.sh" "$(<"$HOME/.cache/current-wallpaper")"
 fi
-
-# Try restoring cached wallpaper
-awww restore 2>/dev/null
-
-# If still not displaying an image, restore from ~/.cache/current-wallpaper
-# or fall back to the first wallpaper in the library.
-if ! awww query 2>/dev/null | grep -q "image:"; then
-    if [ -s "$HOME/.cache/current-wallpaper" ] && [ -f "$(<"$HOME/.cache/current-wallpaper")" ]; then
-        "$HOME/.config/hypr/scripts/swww-all.sh" "$(<"$HOME/.cache/current-wallpaper")"
-    else
-        WALL=$(find "$WALL_DIR" -maxdepth 1 -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) 2>/dev/null | sort | head -n 1)
-        if [ -n "$WALL" ]; then
-            "$HOME/.config/hypr/scripts/swww-all.sh" "$WALL"
-        else
-            "$HOME/.config/hypr/scripts/random-wall.sh"
-        fi
-    fi
+WALL=""
+if ((${#WALL_DIRS[@]})); then
+    WALL=$(find "${WALL_DIRS[@]}" -maxdepth 1 -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) 2>/dev/null | sort | head -n 1 || true)
+fi
+if [ -n "${WALL:-}" ]; then
+    exec "$HOME/.config/hypr/scripts/hypr-wall.sh" "$WALL"
+else
+    exec "$HOME/.config/hypr/scripts/random-wall.sh"
 fi

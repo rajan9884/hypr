@@ -8,13 +8,13 @@ local HOME = os.getenv("HOME")
 
 return {
 	HOME = HOME,
-	terminal = "foot", -- primary: lightest Wayland-native (~10MB idle)
-	terminal_alt = "alacritty", -- secondary: GPU-accelerated; swap to primary by editing here
-	browser = HOME .. "/.local/bin/chromium",
-	browser_private = HOME .. "/.local/bin/chromium --incognito",
-	editor = "foot -e nvim",
-	terminal_tmux = "foot -e tmux",
-	menu = "rofi -show drun",
+	terminal = "alacritty", -- Void primary (matches sway $term; foot is fallback)
+	terminal_alt = "foot", -- secondary fallback
+	browser = HOME .. "/.local/bin/helium-browser",
+	browser_private = HOME .. "/.local/bin/helium-browser --incognito",
+	editor = "alacritty -e nvim",
+	terminal_tmux = "alacritty -e tmux",
+	menu = "rofi -show drun -theme ~/.config/rofi/active-launcher.rasi",
 	file = HOME .. "/.local/bin/thunar-cwd",
 	scripts = HOME .. "/.config/hypr/scripts",
 	mod = "SUPER",
