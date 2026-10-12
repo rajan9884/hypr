@@ -3,7 +3,10 @@
 -- ──────────────────────────────────────────────
 
 -- ── Monitor ──────────────────────────────────
-hl.monitor({ output = "eDP-1", mode = "2880x1800@90", position = "0x0", scale = 2 })
+-- HDR enabled: Samsung ATNA40YK11-0 OLED (10-bit, BT2020, ST2084 PQ, 616 nits max)
+-- Verified via edid-decode: HDR Static Metadata present, so auto-detect works.
+-- cm="hdr" puts desktop in HDR, bitdepth=10 for 10-bit output.
+hl.monitor({ output = "eDP-1", mode = "2880x1800@90", position = "0x0", scale = 2, bitdepth = 10, cm = "hdr", supports_hdr = 1, supports_wide_color = 1 })
 hl.monitor({ output = "", mode = "preferred", position = "auto", scale = 1 })
 
 -- ── Environment ──────────────────────────────

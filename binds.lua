@@ -176,6 +176,7 @@ hl.bind(mod .. " + period", hl.dsp.exec_cmd(vars.HOME .. "/.local/bin/menu-emoji
 hl.bind(mod .. " + K", hl.dsp.exec_cmd(scripts .. "/keybinds-cheatsheet.sh"), { description = "Keybindings cheatsheet" })
 hl.bind(mod .. " + slash", hl.dsp.exec_cmd(scripts .. "/keybinds-cheatsheet.sh"), { description = "Keybindings cheatsheet" })
 hl.bind(mod .. " + SHIFT + A", hl.dsp.exec_cmd(scripts .. "/animations-toggle.sh"), { description = "Toggle animations on/off" })
+hl.bind(mod .. " + CTRL + H", hl.dsp.exec_cmd(scripts .. "/hdr-toggle.sh"), { description = "Toggle HDR on/off (eDP-1)" })
 
 -- Switch workspaces (1–10; keys 1–9 and 0)
 for i = 1, 10 do

@@ -60,6 +60,9 @@ hl.config({
 	},
 	render = {
 		direct_scanout = true, -- was misc.no_direct_scanout (inverted)
+		-- HDR / color management (Hyprland >= 0.55, ArchWiki HDR)
+		cm_enabled = true,
+		cm_auto_hdr = 1, -- auto-switch to HDR for fullscreen HDR content
 	},
 	debug = {
 		disable_logs = true,

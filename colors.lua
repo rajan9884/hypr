@@ -3,9 +3,9 @@
 --   Mirrors colors.conf · do not edit manually
 --   Source template: matugen/templates/hyprland.lua
 -- ─────────────────────────────────────────────
-active_border = "c2c8c7"
-inactive_border = "434847"
-background = "131313"
+active_border = "c0c7d3"
+inactive_border = "45474b"
+background = "131314"
 
 return {
     active_border = active_border,
